@@ -7,7 +7,8 @@ from station.models import (
     Carriage,
     Station,
     Route,
-    Crew
+    Crew,
+    Journey
 )
 from station.serializers import (
     TrainTypeSerializer,
@@ -15,7 +16,8 @@ from station.serializers import (
     CarriageSerializer,
     StationSerializer,
     RouteSerializer,
-    CrewSerializer
+    CrewSerializer,
+    JourneySerializer
 )
 
 
@@ -71,3 +73,20 @@ class CrewViewSet(
 ):
     queryset = Crew.objects.all()
     serializer_class = CrewSerializer
+
+
+class JourneyViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet,
+):
+    queryset = (
+        Journey.objects
+        .select_related(
+            "route__to_station",
+            "route__from_station",
+            "train__train_type"
+        )
+        .prefetch_related("crew")
+    )
+    serializer_class = JourneySerializer
