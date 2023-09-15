@@ -1,7 +1,12 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from station.models import TrainType, Train, Carriage
+from station.models import (
+    TrainType,
+    Train,
+    Carriage,
+    Station
+)
 
 
 class TrainTypeSerializer(serializers.ModelSerializer):
@@ -37,3 +42,9 @@ class CarriageSerializer(serializers.ModelSerializer):
             "seat_price",
             "train"
         )
+
+
+class StationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Station
+        fields = ("id", "name", "latitude", "longitude")

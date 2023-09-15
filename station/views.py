@@ -1,11 +1,17 @@
 from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet
 
-from station.models import TrainType, Train, Carriage
+from station.models import (
+    TrainType,
+    Train,
+    Carriage,
+    Station
+)
 from station.serializers import (
     TrainTypeSerializer,
     TrainSerializer,
-    CarriageSerializer
+    CarriageSerializer,
+    StationSerializer
 )
 
 
@@ -34,3 +40,12 @@ class CarriageViewSet(
 ):
     queryset = Carriage.objects.select_related("train")
     serializer_class = CarriageSerializer
+
+
+class StationViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet,
+):
+    queryset = Station.objects.all()
+    serializer_class = StationSerializer
