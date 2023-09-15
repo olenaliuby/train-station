@@ -61,6 +61,16 @@ class Carriage(models.Model):
             Carriage.CarriageType(self.carriage_type)
         ]
 
+    @staticmethod
+    def validate_carriage_number(number, train, error_to_raise):
+        if Carriage.objects.filter(number=number, train=train).exists():
+            raise error_to_raise(
+                {
+                    "number": "Carriage with this number "
+                              "already exists for this train."
+                }
+            )
+
     class Meta:
         ordering = ["number"]
         constraints = [
