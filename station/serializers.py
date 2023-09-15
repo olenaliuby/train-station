@@ -5,7 +5,8 @@ from station.models import (
     TrainType,
     Train,
     Carriage,
-    Station
+    Station,
+    Route
 )
 
 
@@ -48,3 +49,19 @@ class StationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Station
         fields = ("id", "name", "latitude", "longitude")
+
+
+class RouteSerializer(serializers.ModelSerializer):
+    def validate(self, attrs):
+        from_station = attrs.get("from_station")
+        to_station = attrs.get("to_station")
+        if from_station == to_station:
+            raise serializers.ValidationError(
+                "Source (from station) and destination "
+                "(to station) cannot be the same."
+            )
+        return attrs
+
+    class Meta:
+        model = Route
+        fields = ("id", "name", "distance", "from_station", "to_station")

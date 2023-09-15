@@ -5,13 +5,15 @@ from station.models import (
     TrainType,
     Train,
     Carriage,
-    Station
+    Station,
+    Route
 )
 from station.serializers import (
     TrainTypeSerializer,
     TrainSerializer,
     CarriageSerializer,
-    StationSerializer
+    StationSerializer,
+    RouteSerializer
 )
 
 
@@ -49,3 +51,12 @@ class StationViewSet(
 ):
     queryset = Station.objects.all()
     serializer_class = StationSerializer
+
+
+class RouteViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet,
+):
+    queryset = Route.objects.select_related("from_station", "to_station")
+    serializer_class = RouteSerializer
