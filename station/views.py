@@ -6,14 +6,16 @@ from station.models import (
     Train,
     Carriage,
     Station,
-    Route
+    Route,
+    Crew
 )
 from station.serializers import (
     TrainTypeSerializer,
     TrainSerializer,
     CarriageSerializer,
     StationSerializer,
-    RouteSerializer
+    RouteSerializer,
+    CrewSerializer
 )
 
 
@@ -60,3 +62,12 @@ class RouteViewSet(
 ):
     queryset = Route.objects.select_related("from_station", "to_station")
     serializer_class = RouteSerializer
+
+
+class CrewViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet,
+):
+    queryset = Crew.objects.all()
+    serializer_class = CrewSerializer
