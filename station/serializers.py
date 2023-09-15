@@ -17,6 +17,16 @@ class TrainSerializer(serializers.ModelSerializer):
 
 
 class CarriageSerializer(serializers.ModelSerializer):
+
+    def validate(self, attrs):
+        data = super().validate(attrs=attrs)
+        Carriage.validate_carriage_number(
+            attrs["number"],
+            attrs["train"],
+            ValidationError,
+        )
+        return data
+
     class Meta:
         model = Carriage
         fields = (
