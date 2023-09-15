@@ -71,6 +71,9 @@ class Carriage(models.Model):
                 }
             )
 
+    def is_seat_number_valid(self, seat_number):
+        return 1 <= seat_number <= self.seats
+
     class Meta:
         ordering = ["number"]
         constraints = [
@@ -205,25 +208,35 @@ class Ticket(models.Model):
         return self.carriage.seat_price
 
     @staticmethod
-    def validate_ticket(seat, carriage, error_to_raise):
-        for ticket_attr_value, ticket_attr_name, carriage_attr_name in [
-            (seat, "seat", "seats"),
-        ]:
-            count_attrs = getattr(carriage, carriage_attr_name)
-            if not (1 <= ticket_attr_value <= count_attrs):
-                raise error_to_raise(
-                    {
-                        ticket_attr_name: f"{ticket_attr_name} "
-                                          f"number must be "
-                                          f"in available range: "
-                                          f"(1, {carriage_attr_name}): "
-                                          f"(1, {count_attrs})"
-                    }
-                )
+    def validate_ticket(seat, carriage, train, error_to_raise):
+        if Ticket.objects.filter(
+                carriage=carriage,
+                seat=seat,
+                journey__train=train
+        ).exists():
+            raise error_to_raise(
+                {
+                    "seat":
+                        f"A ticket for seat: {seat}, "
+                        f"in carriage: {carriage.number}, "
+                        f"on train: {train.number}, "
+                        f"already exists."
+                }
+            )
+
+        if not carriage.is_seat_number_valid(seat):
+            raise error_to_raise(
+                {
+                    "seat":
+                        f"Seat number must be in available range: "
+                        f"(1, {carriage.seats}), "
+                        f"but got: {seat}"
+                }
+            )
 
     def clean(self):
         self.validate_ticket(
-            self.seat, self.carriage, ValidationError,
+            self.seat, self.carriage, self.journey.train, ValidationError,
         )
 
     def save(
