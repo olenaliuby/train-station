@@ -23,7 +23,9 @@ from station.serializers import (
     CarriageListSerializer,
     TrainListSerializer,
     TrainDetailSerializer,
-    RouteListSerializer
+    RouteListSerializer,
+    JourneyListSerializer,
+    JourneyDetailSerializer
 )
 
 
@@ -102,6 +104,7 @@ class CrewViewSet(
 
 class JourneyViewSet(
     mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     GenericViewSet,
 ):
@@ -115,6 +118,13 @@ class JourneyViewSet(
         .prefetch_related("crew")
     )
     serializer_class = JourneySerializer
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return JourneyListSerializer
+        if self.action == "retrieve":
+            return JourneyDetailSerializer
+        return JourneySerializer
 
 
 class OrderViewSet(

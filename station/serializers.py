@@ -116,6 +116,48 @@ class CrewSerializer(serializers.ModelSerializer):
 
 
 class JourneySerializer(serializers.ModelSerializer):
+    departure_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M")
+    arrival_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M")
+    crew = serializers.SlugRelatedField(
+        many=True, read_only=True, slug_field="full_name"
+    )
+
+    class Meta:
+        model = Journey
+        fields = (
+            "id",
+            "route",
+            "train",
+            "crew",
+            "departure_time",
+            "arrival_time"
+        )
+
+
+class JourneyListSerializer(JourneySerializer):
+    route_name = serializers.CharField(source="route.name", read_only=True)
+    train_name = serializers.CharField(source="train.name", read_only=True)
+    train_number = serializers.CharField(source="train.number", read_only=True)
+    train_type = serializers.CharField(source="train.train_type.name", read_only=True)
+
+    class Meta:
+        model = Journey
+        fields = (
+            "id",
+            "route_name",
+            "train_name",
+            "train_number",
+            "train_type",
+            "crew",
+            "departure_time",
+            "arrival_time"
+        )
+
+
+class JourneyDetailSerializer(JourneySerializer):
+    route = RouteListSerializer(many=False, read_only=True)
+    train = TrainDetailSerializer(many=False, read_only=True)
+
     class Meta:
         model = Journey
         fields = (
