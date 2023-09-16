@@ -21,12 +21,6 @@ class TrainTypeSerializer(serializers.ModelSerializer):
         fields = ("id", "name")
 
 
-class TrainSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Train
-        fields = ("id", "name", "number", "train_type")
-
-
 class CarriageSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
@@ -54,6 +48,34 @@ class CarriageListSerializer(CarriageSerializer):
     train = serializers.SlugRelatedField(
         read_only=True, slug_field="name"
     )
+
+
+class TrainSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Train
+        fields = ("id", "name", "number", "train_type")
+
+
+class TrainListSerializer(TrainSerializer):
+    train_type = serializers.SlugRelatedField(
+        read_only=True, slug_field="name"
+    )
+    carriage_count = serializers.SerializerMethodField()
+
+    def get_carriage_count(self, obj):
+        return obj.carriages.count()
+
+    class Meta:
+        model = Train
+        fields = ("id", "name", "number", "train_type", "carriage_count")
+
+
+class TrainDetailSerializer(TrainSerializer):
+    carriages = CarriageListSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Train
+        fields = ("id", "name", "number", "train_type", "carriages")
 
 
 class StationSerializer(serializers.ModelSerializer):
