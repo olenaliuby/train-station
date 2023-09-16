@@ -9,7 +9,9 @@ from station.models import (
     Station,
     Route,
     Crew,
-    Journey, Order, Ticket
+    Journey,
+    Order,
+    Ticket
 )
 
 
@@ -46,6 +48,12 @@ class CarriageSerializer(serializers.ModelSerializer):
             "seat_price",
             "train"
         )
+
+
+class CarriageListSerializer(CarriageSerializer):
+    train = serializers.SlugRelatedField(
+        read_only=True, slug_field="name"
+    )
 
 
 class StationSerializer(serializers.ModelSerializer):
