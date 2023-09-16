@@ -23,8 +23,17 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = (TicketInLine,)
 
 
+class CarriageInLine(admin.TabularInline):
+    model = Carriage
+    extra = 1
+
+
+@admin.register(Train)
+class TrainAdmin(admin.ModelAdmin):
+    inlines = (CarriageInLine,)
+
+
 admin.site.register(TrainType)
-admin.site.register(Train)
 admin.site.register(Carriage)
 admin.site.register(Station)
 admin.site.register(Route)
