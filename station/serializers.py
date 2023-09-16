@@ -140,6 +140,10 @@ class TicketListSerializer(TicketSerializer):
         source="journey.route.name",
         read_only=True
     )
+    journey_train_number = serializers.IntegerField(
+        source="journey.train.number",
+        read_only=True
+    )
     journey_departure_time = serializers.CharField(
         source="journey.departure_time",
         read_only=True
@@ -152,6 +156,7 @@ class TicketListSerializer(TicketSerializer):
             "seat",
             "carriage_number",
             "journey_route_name",
+            "journey_train_number",
             "journey_departure_time"
         )
 
