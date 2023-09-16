@@ -100,6 +100,15 @@ class RouteSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "distance", "from_station", "to_station")
 
 
+class RouteListSerializer(RouteSerializer):
+    from_station = serializers.SlugRelatedField(
+        read_only=True, slug_field="name"
+    )
+    to_station = serializers.SlugRelatedField(
+        read_only=True, slug_field="name"
+    )
+
+
 class CrewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Crew
