@@ -16,7 +16,7 @@ class TrainType(models.Model):
 
 class Train(models.Model):
     name = models.CharField(max_length=255)
-    number = models.IntegerField(unique=True)
+    number = models.CharField(max_length=8, unique=True)
     train_type = models.ForeignKey(
         TrainType,
         on_delete=models.CASCADE,
@@ -24,7 +24,7 @@ class Train(models.Model):
     )
 
     class Meta:
-        ordering = ["name"]
+        ordering = ["number"]
 
     def __str__(self):
         return self.name
