@@ -216,18 +216,19 @@ class Ticket(models.Model):
         return self.carriage.seat_price
 
     @staticmethod
-    def validate_ticket(seat, carriage, train, error_to_raise):
+    def validate_ticket(seat, carriage, journey, error_to_raise):
         if Ticket.objects.filter(
                 carriage=carriage,
                 seat=seat,
-                journey__train=train
+                journey=journey
         ).exists():
             raise error_to_raise(
                 {
                     "seat":
                         f"A ticket for seat: {seat}, "
                         f"in carriage: {carriage.number}, "
-                        f"on train: {train.number}, "
+                        f"on train: {journey.train}, "
+                        f"on journey route: {journey.route.name}, "
                         f"already exists."
                 }
             )
@@ -244,7 +245,7 @@ class Ticket(models.Model):
 
     def clean(self):
         self.validate_ticket(
-            self.seat, self.carriage, self.journey.train, ValidationError,
+            self.seat, self.carriage, self.journey, ValidationError,
         )
 
     def save(
