@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 
 
@@ -47,7 +48,7 @@ class Carriage(models.Model):
         default=CarriageType.ECONOMY,
     )
 
-    number = models.IntegerField()
+    number = models.IntegerField(validators=[MinValueValidator(1)])
     seats = models.IntegerField()
     train = models.ForeignKey(
         Train,
