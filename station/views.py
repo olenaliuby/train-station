@@ -1,3 +1,4 @@
+from django.db.models import Count
 from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet
 
@@ -25,7 +26,8 @@ from station.serializers import (
     TrainDetailSerializer,
     RouteListSerializer,
     JourneyListSerializer,
-    JourneyDetailSerializer, OrderListSerializer
+    JourneyDetailSerializer,
+    OrderListSerializer
 )
 
 
@@ -44,7 +46,10 @@ class TrainViewSet(
     mixins.RetrieveModelMixin,
     GenericViewSet,
 ):
-    queryset = Train.objects.select_related("train_type")
+    queryset = (
+        Train.objects.select_related("train_type")
+        .annotate(carriage_count=Count("carriages"))
+    )
     serializer_class = TrainSerializer
 
     def get_serializer_class(self):

@@ -60,10 +60,8 @@ class TrainListSerializer(TrainSerializer):
     train_type = serializers.SlugRelatedField(
         read_only=True, slug_field="name"
     )
-    carriage_count = serializers.SerializerMethodField()
+    carriage_count = serializers.IntegerField(read_only=True)
 
-    def get_carriage_count(self, obj):
-        return obj.carriages.count()
 
     class Meta:
         model = Train
