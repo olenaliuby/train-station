@@ -23,6 +23,13 @@ class Train(models.Model):
         related_name="trains"
     )
 
+    @property
+    def capacity(self):
+        return sum(
+            carriage.seats
+            for carriage in self.carriages.all()
+        )
+
     class Meta:
         ordering = ["number"]
 

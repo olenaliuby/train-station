@@ -67,7 +67,14 @@ class TrainListSerializer(TrainSerializer):
 
     class Meta:
         model = Train
-        fields = ("id", "name", "number", "train_type", "carriage_count")
+        fields = (
+            "id",
+            "name",
+            "number",
+            "train_type",
+            "carriage_count",
+            "capacity"
+        )
 
 
 class TrainDetailSerializer(TrainSerializer):
@@ -190,7 +197,10 @@ class JourneyListSerializer(JourneySerializer):
     route_name = serializers.CharField(source="route.name", read_only=True)
     train_name = serializers.CharField(source="train.name", read_only=True)
     train_number = serializers.CharField(source="train.number", read_only=True)
-    train_type = serializers.CharField(source="train.train_type.name", read_only=True)
+    train_type = serializers.CharField(
+        source="train.train_type.name",
+        read_only=True
+    )
 
     class Meta:
         model = Journey
@@ -209,7 +219,11 @@ class JourneyListSerializer(JourneySerializer):
 class JourneyDetailSerializer(JourneySerializer):
     route = RouteListSerializer(many=False, read_only=True)
     train = TrainDetailSerializer(many=False, read_only=True)
-    taken_seats = TicketSeatsSerializer(source="tickets", many=True, read_only=True)
+    taken_seats = TicketSeatsSerializer(
+        source="tickets",
+        many=True,
+        read_only=True
+    )
 
     class Meta:
         model = Journey
