@@ -1,4 +1,5 @@
-from django.db.models import Count
+from django.db.models import OuterRef, Subquery, Sum, Count, Value
+from django.db.models.functions import Coalesce
 from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet
 
@@ -10,7 +11,7 @@ from station.models import (
     Route,
     Crew,
     Journey,
-    Order
+    Order, Ticket
 )
 from station.serializers import (
     TrainTypeSerializer,
@@ -123,6 +124,22 @@ class JourneyViewSet(
         .prefetch_related("crew")
     )
     serializer_class = JourneySerializer
+
+    def get_queryset(self):
+        tickets_subquery = (
+            Ticket.objects.filter(journey=OuterRef("pk"))
+            .values("journey")
+            .annotate(cnt=Count("id"))
+            .values("cnt")
+        )
+
+        queryset = super().get_queryset().annotate(
+            tickets_available=(
+                Sum("train__carriages__seats")
+                - Coalesce(Subquery(tickets_subquery), Value(0))
+            )
+        )
+        return queryset
 
     def get_serializer_class(self):
         if self.action == "list":
