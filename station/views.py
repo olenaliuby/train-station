@@ -55,12 +55,36 @@ class TrainViewSet(
     )
     serializer_class = TrainSerializer
 
+    @staticmethod
+    def _params_to_ints(qs):
+        """Converts a list of string IDs to a list of integers"""
+        return [int(str_id) for str_id in qs.split(",")]
+
     def get_serializer_class(self):
         if self.action == "list":
             return TrainListSerializer
         if self.action == "retrieve":
             return TrainDetailSerializer
         return TrainSerializer
+
+    def get_queryset(self):
+        """Retrieve the trains with filters"""
+        name = self.request.query_params.get("name")
+        number = self.request.query_params.get("number")
+        train_type = self.request.query_params.get("train_type")
+        queryset = self.queryset
+
+        if number is not None:
+            queryset = queryset.filter(number__icontains=number)
+
+        if name is not None:
+            queryset = queryset.filter(name__icontains=name)
+
+        if train_type is not None:
+            train_type_ids = self._params_to_ints(train_type)
+            queryset = queryset.filter(train_type__id__in=train_type_ids)
+
+        return queryset
 
 
 class CarriageViewSet(
@@ -137,8 +161,8 @@ class JourneyViewSet(
 
         queryset = super().get_queryset().annotate(
             tickets_available=(
-                Sum("train__carriages__seats")
-                - Coalesce(Subquery(tickets_subquery), Value(0))
+                    Sum("train__carriages__seats")
+                    - Coalesce(Subquery(tickets_subquery), Value(0))
             )
         )
         return queryset
