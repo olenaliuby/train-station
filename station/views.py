@@ -1,6 +1,7 @@
 from django.db.models import OuterRef, Subquery, Sum, Count, Value
 from django.db.models.functions import Coalesce
 from rest_framework import mixins
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.viewsets import GenericViewSet
 
 from station.models import (
@@ -11,7 +12,8 @@ from station.models import (
     Route,
     Crew,
     Journey,
-    Order, Ticket
+    Order,
+    Ticket
 )
 from station.serializers import (
     TrainTypeSerializer,
@@ -149,6 +151,11 @@ class JourneyViewSet(
         return JourneySerializer
 
 
+class OrderPagination(PageNumberPagination):
+    page_size = 5
+    max_page_size = 100
+
+
 class OrderViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
@@ -156,6 +163,7 @@ class OrderViewSet(
 ):
     queryset = Order.objects.select_related("ticket__carriage__train")
     serializer_class = OrderSerializer
+    pagination_class = OrderPagination
 
     def get_queryset(self):
         return Order.objects.filter(user=self.request.user)
