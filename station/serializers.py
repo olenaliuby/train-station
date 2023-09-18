@@ -174,9 +174,7 @@ class TicketSeatsSerializer(TicketSerializer):
 class JourneySerializer(serializers.ModelSerializer):
     departure_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M")
     arrival_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M")
-    crew = serializers.SlugRelatedField(
-        many=True, read_only=True, slug_field="full_name"
-    )
+    crew = CrewSerializer(many=True, required=False)
 
     class Meta:
         model = Journey
@@ -184,10 +182,19 @@ class JourneySerializer(serializers.ModelSerializer):
             "id",
             "route",
             "train",
-            "crew",
             "departure_time",
-            "arrival_time"
+            "arrival_time",
+            "crew"
         )
+
+    def create(self, validated_data):
+        crew_data = validated_data.pop("crew", [])
+        journey = Journey.objects.create(**validated_data)
+        crew_members = Crew.objects.bulk_create(
+            [Crew(**data) for data in crew_data]
+        )
+        journey.crew.add(*crew_members)
+        return journey
 
 
 class JourneyListSerializer(JourneySerializer):
@@ -199,6 +206,11 @@ class JourneyListSerializer(JourneySerializer):
         read_only=True
     )
     tickets_available = serializers.IntegerField(read_only=True)
+    crew = serializers.SlugRelatedField(
+        many=True,
+        read_only=True,
+        slug_field="full_name"
+    )
 
     class Meta:
         model = Journey
