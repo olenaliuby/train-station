@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db.models import OuterRef, Subquery, Sum, Count, Value
 from django.db.models.functions import Coalesce
 from rest_framework import mixins
@@ -152,6 +154,11 @@ class JourneyViewSet(
     serializer_class = JourneySerializer
 
     def get_queryset(self):
+        """
+        Subquery for tickets count for each journey.
+        Retrieve the journeys with filters.
+        """
+
         tickets_subquery = (
             Ticket.objects.filter(journey=OuterRef("pk"))
             .values("journey")
@@ -165,6 +172,22 @@ class JourneyViewSet(
                     - Coalesce(Subquery(tickets_subquery), Value(0))
             )
         )
+
+        departure_time = self.request.query_params.get("departure_time")
+        arrival_time = self.request.query_params.get("arrival_time")
+        train_id_str = self.request.query_params.get("train")
+
+        if departure_time is not None:
+            departure_date = datetime.strptime(departure_time, "%Y-%m-%d").date()
+            queryset = queryset.filter(departure_time__day=departure_date.day)
+
+        if arrival_time is not None:
+            arrival_date = datetime.strptime(arrival_time, "%Y-%m-%d").date()
+            queryset = queryset.filter(arrival_time__day=arrival_date.day)
+
+        if train_id_str is not None:
+            queryset = queryset.filter(train__id=int(train_id_str))
+
         return queryset
 
     def get_serializer_class(self):
