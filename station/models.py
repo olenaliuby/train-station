@@ -169,6 +169,7 @@ class Journey(models.Model):
         related_name="journeys"
     )
     image = models.ImageField(
+        blank=True,
         null=True,
         upload_to=UploadToPath("journey-images/")
     )
