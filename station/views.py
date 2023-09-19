@@ -3,7 +3,9 @@ from datetime import datetime
 from django.db.models import OuterRef, Subquery, Sum, Count, Value
 from django.db.models.functions import Coalesce
 from rest_framework import mixins, viewsets
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
 from station.models import (
@@ -17,6 +19,7 @@ from station.models import (
     Order,
     Ticket
 )
+from station.permissions import IsAdminOrIfAuthenticatedReadOnly
 from station.serializers import (
     TrainTypeSerializer,
     TrainSerializer,
@@ -43,6 +46,8 @@ class TrainTypeViewSet(
 ):
     queryset = TrainType.objects.all()
     serializer_class = TrainTypeSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
 
 class TrainViewSet(
@@ -56,6 +61,8 @@ class TrainViewSet(
         .annotate(carriage_count=Count("carriages"))
     )
     serializer_class = TrainSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
     @staticmethod
     def _params_to_ints(qs):
@@ -97,6 +104,8 @@ class CarriageViewSet(
 ):
     queryset = Carriage.objects.select_related("train")
     serializer_class = CarriageSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
     def get_serializer_class(self):
         if self.action in ["list", "retrieve"]:
@@ -111,6 +120,8 @@ class StationViewSet(
 ):
     queryset = Station.objects.all()
     serializer_class = StationSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
 
 class RouteViewSet(
@@ -120,6 +131,8 @@ class RouteViewSet(
 ):
     queryset = Route.objects.select_related("from_station", "to_station")
     serializer_class = RouteSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
     def get_serializer_class(self):
         if self.action in ["list", "retrieve"]:
@@ -134,6 +147,8 @@ class CrewViewSet(
 ):
     queryset = Crew.objects.all()
     serializer_class = CrewSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
 
 class JourneyViewSet(viewsets.ModelViewSet):
@@ -147,6 +162,8 @@ class JourneyViewSet(viewsets.ModelViewSet):
         .prefetch_related("crew")
     )
     serializer_class = JourneySerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
     def get_queryset(self):
         """
@@ -206,6 +223,8 @@ class OrderViewSet(
     queryset = Order.objects.select_related("ticket__carriage__train")
     serializer_class = OrderSerializer
     pagination_class = OrderPagination
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         return Order.objects.filter(user=self.request.user)
