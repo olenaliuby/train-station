@@ -2,6 +2,8 @@ from datetime import datetime
 
 from django.db.models import OuterRef, Subquery, Sum, Count, Value
 from django.db.models.functions import Coalesce
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import mixins, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -37,7 +39,9 @@ from station.serializers import (
     JourneyListSerializer,
     JourneyDetailSerializer,
     OrderListSerializer,
-    TrainImageSerializer, JourneyImageSerializer, CrewImageSerializer
+    TrainImageSerializer,
+    JourneyImageSerializer,
+    CrewImageSerializer
 )
 
 
@@ -64,11 +68,6 @@ class TrainViewSet(
     serializer_class = TrainSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
-    @staticmethod
-    def _params_to_ints(qs):
-        """Converts a list of string IDs to a list of integers"""
-        return [int(str_id) for str_id in qs.split(",")]
-
     def get_serializer_class(self):
         if self.action == "list":
             return TrainListSerializer
@@ -92,8 +91,7 @@ class TrainViewSet(
             queryset = queryset.filter(name__icontains=name)
 
         if train_type is not None:
-            train_type_ids = self._params_to_ints(train_type)
-            queryset = queryset.filter(train_type__id__in=train_type_ids)
+            queryset = queryset.filter(train_type__name__icontains=train_type)
 
         return queryset
 
