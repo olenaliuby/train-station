@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.db.models import OuterRef, Subquery, Sum, Count, Value
 from django.db.models.functions import Coalesce
+from django.views.decorators.cache import never_cache
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import mixins, viewsets, status
@@ -63,6 +64,7 @@ class TrainViewSet(
 ):
     queryset = (
         Train.objects.select_related("train_type")
+        .prefetch_related("carriages")
         .annotate(carriage_count=Count("carriages"))
     )
     serializer_class = TrainSerializer
@@ -81,7 +83,7 @@ class TrainViewSet(
         """Retrieve the trains with filters"""
         name = self.request.query_params.get("name")
         number = self.request.query_params.get("number")
-        train_type = self.request.query_params.get("train_type")
+        train_type_name = self.request.query_params.get("train_type_name")
         queryset = self.queryset
 
         if number is not None:
@@ -90,8 +92,8 @@ class TrainViewSet(
         if name is not None:
             queryset = queryset.filter(name__icontains=name)
 
-        if train_type is not None:
-            queryset = queryset.filter(train_type__name__icontains=train_type)
+        if train_type_name is not None:
+            queryset = queryset.filter(train_type__name__icontains=train_type_name)
 
         return queryset
 
@@ -111,6 +113,28 @@ class TrainViewSet(
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "train_type",
+                type=OpenApiTypes.STR,
+                description="Filter by train type name (ex. id?=express)"
+            ),
+            OpenApiParameter(
+                "name",
+                type=OpenApiTypes.STR,
+                description="Filter by train name (ex. name?=podilskyi)"
+            ),
+            OpenApiParameter(
+                "number",
+                type=OpenApiTypes.STR,
+                description="Filter by train number (ex. number?=123)"
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class CarriageViewSet(
@@ -214,8 +238,8 @@ class JourneyViewSet(viewsets.ModelViewSet):
 
         queryset = super().get_queryset().annotate(
             tickets_available=(
-                Sum("train__carriages__seats")
-                - Coalesce(Subquery(tickets_subquery), Value(0))
+                    Sum("train__carriages__seats")
+                    - Coalesce(Subquery(tickets_subquery), Value(0))
             )
         )
 
@@ -264,6 +288,28 @@ class JourneyViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "departure_time",
+                type=OpenApiTypes.DATE,
+                description="Filter by departure time (ex. ?departure_time=2021-12-31)"
+            ),
+            OpenApiParameter(
+                "arrival_time",
+                type=OpenApiTypes.DATE,
+                description="Filter by arrival time (ex. ?arrival_time=2021-12-31)"
+            ),
+            OpenApiParameter(
+                "train",
+                type=OpenApiTypes.INT,
+                description="Filter by train id (ex. ?train=1)"
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class OrderPagination(PageNumberPagination):
