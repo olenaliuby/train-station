@@ -2,7 +2,7 @@ from datetime import datetime
 
 from django.db.models import OuterRef, Subquery, Sum, Count, Value
 from django.db.models.functions import Coalesce
-from rest_framework import mixins
+from rest_framework import mixins, viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.viewsets import GenericViewSet
 
@@ -136,12 +136,7 @@ class CrewViewSet(
     serializer_class = CrewSerializer
 
 
-class JourneyViewSet(
-    mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.ListModelMixin,
-    GenericViewSet,
-):
+class JourneyViewSet(viewsets.ModelViewSet):
     queryset = (
         Journey.objects
         .select_related(
