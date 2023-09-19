@@ -70,7 +70,8 @@ class TrainListSerializer(TrainSerializer):
             "number",
             "train_type",
             "carriage_count",
-            "capacity"
+            "capacity",
+            "image"
         )
 
 
@@ -79,7 +80,13 @@ class TrainDetailSerializer(TrainSerializer):
 
     class Meta:
         model = Train
-        fields = ("id", "name", "number", "train_type", "carriages")
+        fields = ("id", "name", "number", "train_type", "carriages", "image")
+
+
+class TrainImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Train
+        fields = ("id", "image")
 
 
 class StationSerializer(serializers.ModelSerializer):
@@ -116,7 +123,13 @@ class RouteListSerializer(RouteSerializer):
 class CrewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Crew
-        fields = ("id", "first_name", "last_name", "full_name")
+        fields = ("id", "first_name", "last_name", "full_name", "image")
+
+
+class CrewImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Crew
+        fields = ("id", "image")
 
 
 class TicketSerializer(serializers.ModelSerializer):
@@ -224,6 +237,7 @@ class JourneyListSerializer(JourneySerializer):
             "departure_time",
             "arrival_time",
             "crew",
+            "image"
         )
 
 
@@ -245,8 +259,15 @@ class JourneyDetailSerializer(JourneySerializer):
             "crew",
             "departure_time",
             "arrival_time",
+            "image",
             "taken_seats"
         )
+
+
+class JourneyImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Journey
+        fields = ("id", "image")
 
 
 class OrderSerializer(serializers.ModelSerializer):

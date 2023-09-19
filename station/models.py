@@ -3,6 +3,8 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 
+from station.upload_to_path import UploadToPath
+
 
 class TrainType(models.Model):
     name = models.CharField(max_length=255)
@@ -21,6 +23,10 @@ class Train(models.Model):
         TrainType,
         on_delete=models.CASCADE,
         related_name="trains"
+    )
+    image = models.ImageField(
+        null=True,
+        upload_to=UploadToPath("train-images/")
     )
 
     @property
@@ -131,6 +137,14 @@ class Route(models.Model):
 class Crew(models.Model):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
+    image = models.ImageField(
+        null=True,
+        upload_to=UploadToPath("crew-images/")
+    )
+
+    class Meta:
+        ordering = ["first_name", "last_name"]
+        verbose_name_plural = "crew"
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -153,6 +167,10 @@ class Journey(models.Model):
         Train,
         on_delete=models.CASCADE,
         related_name="journeys"
+    )
+    image = models.ImageField(
+        null=True,
+        upload_to=UploadToPath("journey-images/")
     )
 
     def clean(self):
