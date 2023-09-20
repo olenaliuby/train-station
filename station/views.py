@@ -2,7 +2,6 @@ from datetime import datetime
 
 from django.db.models import OuterRef, Subquery, Sum, Count, Value
 from django.db.models.functions import Coalesce
-from django.views.decorators.cache import never_cache
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import mixins, viewsets, status
@@ -84,7 +83,7 @@ class TrainViewSet(
         name = self.request.query_params.get("name")
         number = self.request.query_params.get("number")
         train_type_name = self.request.query_params.get("train_type_name")
-        queryset = self.queryset
+        queryset = super().get_queryset()
 
         if number is not None:
             queryset = queryset.filter(number__icontains=number)
