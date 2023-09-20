@@ -25,6 +25,7 @@ class Train(models.Model):
         related_name="trains"
     )
     image = models.ImageField(
+        blank=True,
         null=True,
         upload_to=UploadToPath("train-images/")
     )
@@ -138,6 +139,7 @@ class Crew(models.Model):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     image = models.ImageField(
+        blank=True,
         null=True,
         upload_to=UploadToPath("crew-images/")
     )
