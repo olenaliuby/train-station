@@ -76,6 +76,7 @@ class TrainListSerializer(TrainSerializer):
 
 
 class TrainDetailSerializer(TrainSerializer):
+    train_type = TrainTypeSerializer(many=False, read_only=True)
     carriages = CarriageListSerializer(many=True, read_only=True)
 
     class Meta:
