@@ -92,7 +92,9 @@ class TrainViewSet(
             queryset = queryset.filter(name__icontains=name)
 
         if train_type_name is not None:
-            queryset = queryset.filter(train_type__name__icontains=train_type_name)
+            queryset = queryset.filter(
+                train_type__name__icontains=train_type_name
+            )
 
         return queryset
 
@@ -237,8 +239,8 @@ class JourneyViewSet(viewsets.ModelViewSet):
 
         queryset = super().get_queryset().annotate(
             tickets_available=(
-                    Sum("train__carriages__seats")
-                    - Coalesce(Subquery(tickets_subquery), Value(0))
+                Sum("train__carriages__seats")
+                - Coalesce(Subquery(tickets_subquery), Value(0))
             )
         )
 
@@ -293,12 +295,16 @@ class JourneyViewSet(viewsets.ModelViewSet):
             OpenApiParameter(
                 "departure_time",
                 type=OpenApiTypes.DATE,
-                description="Filter by departure time (ex. ?departure_time=2021-12-31)"
+                description=(
+                    "Filter by departure time (ex. ?departure_time=2021-12-31)"
+                )
             ),
             OpenApiParameter(
                 "arrival_time",
                 type=OpenApiTypes.DATE,
-                description="Filter by arrival time (ex. ?arrival_time=2021-12-31)"
+                description=(
+                    "Filter by arrival time (ex. ?arrival_time=2021-12-31)"
+                )
             ),
             OpenApiParameter(
                 "train",
