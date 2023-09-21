@@ -5,15 +5,18 @@ import station.upload_to_path
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('station', '0006_alter_crew_options'),
+        ("station", "0006_alter_crew_options"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='journey',
-            name='image',
-            field=models.ImageField(blank=True, null=True, upload_to=station.upload_to_path.UploadToPath('journey-images/')),
+            model_name="journey",
+            name="image",
+            field=models.ImageField(
+                blank=True,
+                null=True,
+                upload_to=station.upload_to_path.UploadToPath("journey-images/"),
+            ),
         ),
     ]

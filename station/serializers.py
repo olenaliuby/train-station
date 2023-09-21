@@ -11,7 +11,7 @@ from station.models import (
     Crew,
     Journey,
     Order,
-    Ticket
+    Ticket,
 )
 
 
@@ -22,7 +22,6 @@ class TrainTypeSerializer(serializers.ModelSerializer):
 
 
 class CarriageSerializer(serializers.ModelSerializer):
-
     def validate(self, attrs):
         data = super().validate(attrs=attrs)
         Carriage.validate_carriage_number(
@@ -34,20 +33,11 @@ class CarriageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Carriage
-        fields = (
-            "id",
-            "number",
-            "carriage_type",
-            "seats",
-            "seat_price",
-            "train"
-        )
+        fields = ("id", "number", "carriage_type", "seats", "seat_price", "train")
 
 
 class CarriageListSerializer(CarriageSerializer):
-    train = serializers.SlugRelatedField(
-        read_only=True, slug_field="name"
-    )
+    train = serializers.SlugRelatedField(read_only=True, slug_field="name")
 
 
 class TrainSerializer(serializers.ModelSerializer):
@@ -57,9 +47,7 @@ class TrainSerializer(serializers.ModelSerializer):
 
 
 class TrainListSerializer(TrainSerializer):
-    train_type = serializers.SlugRelatedField(
-        read_only=True, slug_field="name"
-    )
+    train_type = serializers.SlugRelatedField(read_only=True, slug_field="name")
     carriage_count = serializers.IntegerField(read_only=True)
 
     class Meta:
@@ -71,7 +59,7 @@ class TrainListSerializer(TrainSerializer):
             "train_type",
             "carriage_count",
             "capacity",
-            "image"
+            "image",
         )
 
 
@@ -113,12 +101,8 @@ class RouteSerializer(serializers.ModelSerializer):
 
 
 class RouteListSerializer(RouteSerializer):
-    from_station = serializers.SlugRelatedField(
-        read_only=True, slug_field="name"
-    )
-    to_station = serializers.SlugRelatedField(
-        read_only=True, slug_field="name"
-    )
+    from_station = serializers.SlugRelatedField(read_only=True, slug_field="name")
+    to_station = serializers.SlugRelatedField(read_only=True, slug_field="name")
 
 
 class CrewSerializer(serializers.ModelSerializer):
@@ -137,10 +121,7 @@ class TicketSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         data = super().validate(attrs=attrs)
         Ticket.validate_ticket(
-            attrs["seat"],
-            attrs["carriage"],
-            attrs["journey"],
-            ValidationError
+            attrs["seat"], attrs["carriage"], attrs["journey"], ValidationError
         )
         return data
 
@@ -150,21 +131,15 @@ class TicketSerializer(serializers.ModelSerializer):
 
 
 class TicketListSerializer(TicketSerializer):
-    carriage_number = serializers.IntegerField(
-        source="carriage.number",
-        read_only=True
-    )
+    carriage_number = serializers.IntegerField(source="carriage.number", read_only=True)
     journey_route_name = serializers.CharField(
-        source="journey.route.name",
-        read_only=True
+        source="journey.route.name", read_only=True
     )
     journey_train_number = serializers.IntegerField(
-        source="journey.train.number",
-        read_only=True
+        source="journey.train.number", read_only=True
     )
     journey_departure_time = serializers.CharField(
-        source="journey.departure_time",
-        read_only=True
+        source="journey.departure_time", read_only=True
     )
 
     class Meta:
@@ -175,7 +150,7 @@ class TicketListSerializer(TicketSerializer):
             "carriage_number",
             "journey_route_name",
             "journey_train_number",
-            "journey_departure_time"
+            "journey_departure_time",
         )
 
 
@@ -192,21 +167,12 @@ class JourneySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Journey
-        fields = (
-            "id",
-            "route",
-            "train",
-            "departure_time",
-            "arrival_time",
-            "crew"
-        )
+        fields = ("id", "route", "train", "departure_time", "arrival_time", "crew")
 
     def create(self, validated_data):
         crew_data = validated_data.pop("crew", [])
         journey = Journey.objects.create(**validated_data)
-        crew_members = Crew.objects.bulk_create(
-            [Crew(**data) for data in crew_data]
-        )
+        crew_members = Crew.objects.bulk_create([Crew(**data) for data in crew_data])
         journey.crew.add(*crew_members)
         return journey
 
@@ -215,15 +181,10 @@ class JourneyListSerializer(JourneySerializer):
     route_name = serializers.CharField(source="route.name", read_only=True)
     train_name = serializers.CharField(source="train.name", read_only=True)
     train_number = serializers.CharField(source="train.number", read_only=True)
-    train_type = serializers.CharField(
-        source="train.train_type.name",
-        read_only=True
-    )
+    train_type = serializers.CharField(source="train.train_type.name", read_only=True)
     tickets_available = serializers.IntegerField(read_only=True)
     crew = serializers.SlugRelatedField(
-        many=True,
-        read_only=True,
-        slug_field="full_name"
+        many=True, read_only=True, slug_field="full_name"
     )
 
     class Meta:
@@ -238,18 +199,14 @@ class JourneyListSerializer(JourneySerializer):
             "departure_time",
             "arrival_time",
             "crew",
-            "image"
+            "image",
         )
 
 
 class JourneyDetailSerializer(JourneySerializer):
     route = RouteListSerializer(many=False, read_only=True)
     train = TrainDetailSerializer(many=False, read_only=True)
-    taken_seats = TicketSeatsSerializer(
-        source="tickets",
-        many=True,
-        read_only=True
-    )
+    taken_seats = TicketSeatsSerializer(source="tickets", many=True, read_only=True)
 
     class Meta:
         model = Journey
@@ -261,7 +218,7 @@ class JourneyDetailSerializer(JourneySerializer):
             "departure_time",
             "arrival_time",
             "image",
-            "taken_seats"
+            "taken_seats",
         )
 
 

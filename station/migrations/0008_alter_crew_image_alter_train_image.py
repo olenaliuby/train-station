@@ -5,20 +5,27 @@ import station.upload_to_path
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('station', '0007_alter_journey_image'),
+        ("station", "0007_alter_journey_image"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='crew',
-            name='image',
-            field=models.ImageField(blank=True, null=True, upload_to=station.upload_to_path.UploadToPath('crew-images/')),
+            model_name="crew",
+            name="image",
+            field=models.ImageField(
+                blank=True,
+                null=True,
+                upload_to=station.upload_to_path.UploadToPath("crew-images/"),
+            ),
         ),
         migrations.AlterField(
-            model_name='train',
-            name='image',
-            field=models.ImageField(blank=True, null=True, upload_to=station.upload_to_path.UploadToPath('train-images/')),
+            model_name="train",
+            name="image",
+            field=models.ImageField(
+                blank=True,
+                null=True,
+                upload_to=station.upload_to_path.UploadToPath("train-images/"),
+            ),
         ),
     ]

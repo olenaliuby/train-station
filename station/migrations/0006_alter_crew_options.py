@@ -4,14 +4,16 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('station', '0005_crew_image_journey_image_train_image'),
+        ("station", "0005_crew_image_journey_image_train_image"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='crew',
-            options={'ordering': ['first_name', 'last_name'], 'verbose_name_plural': 'crew'},
+            name="crew",
+            options={
+                "ordering": ["first_name", "last_name"],
+                "verbose_name_plural": "crew",
+            },
         ),
     ]

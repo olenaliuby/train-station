@@ -20,7 +20,7 @@ from station.models import (
     Crew,
     Journey,
     Order,
-    Ticket
+    Ticket,
 )
 from station.permissions import IsAdminOrIfAuthenticatedReadOnly
 from station.serializers import (
@@ -41,7 +41,7 @@ from station.serializers import (
     OrderListSerializer,
     TrainImageSerializer,
     JourneyImageSerializer,
-    CrewImageSerializer
+    CrewImageSerializer,
 )
 
 
@@ -92,9 +92,7 @@ class TrainViewSet(
             queryset = queryset.filter(name__icontains=name)
 
         if train_type_name is not None:
-            queryset = queryset.filter(
-                train_type__name__icontains=train_type_name
-            )
+            queryset = queryset.filter(train_type__name__icontains=train_type_name)
 
         return queryset
 
@@ -102,15 +100,12 @@ class TrainViewSet(
         methods=["POST"],
         detail=True,
         url_path="upload-image",
-        permission_classes=[IsAdminUser]
+        permission_classes=[IsAdminUser],
     )
     def upload_image(self, request, pk=None):
         """Endpoint to upload an image to a train"""
         train = self.get_object()
-        serializer = self.get_serializer(
-            train,
-            data=request.data
-        )
+        serializer = self.get_serializer(train, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -120,18 +115,18 @@ class TrainViewSet(
             OpenApiParameter(
                 "train_type",
                 type=OpenApiTypes.STR,
-                description="Filter by train type name (ex. id?=express)"
+                description="Filter by train type name (ex. id?=express)",
             ),
             OpenApiParameter(
                 "name",
                 type=OpenApiTypes.STR,
-                description="Filter by train name (ex. name?=podilskyi)"
+                description="Filter by train name (ex. name?=podilskyi)",
             ),
             OpenApiParameter(
                 "number",
                 type=OpenApiTypes.STR,
-                description="Filter by train number (ex. number?=123)"
-            )
+                description="Filter by train number (ex. number?=123)",
+            ),
         ]
     )
     def list(self, request, *args, **kwargs):
@@ -197,30 +192,21 @@ class CrewViewSet(
         methods=["POST"],
         detail=True,
         url_path="upload-image",
-        permission_classes=[IsAdminUser]
+        permission_classes=[IsAdminUser],
     )
     def upload_image(self, request, pk=None):
         """Endpoint to upload an image to a crew member"""
         crew = self.get_object()
-        serializer = self.get_serializer(
-            crew,
-            data=request.data
-        )
+        serializer = self.get_serializer(crew, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class JourneyViewSet(viewsets.ModelViewSet):
-    queryset = (
-        Journey.objects
-        .select_related(
-            "route__to_station",
-            "route__from_station",
-            "train__train_type"
-        )
-        .prefetch_related("crew")
-    )
+    queryset = Journey.objects.select_related(
+        "route__to_station", "route__from_station", "train__train_type"
+    ).prefetch_related("crew")
     serializer_class = JourneySerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
@@ -237,10 +223,14 @@ class JourneyViewSet(viewsets.ModelViewSet):
             .values("cnt")
         )
 
-        queryset = super().get_queryset().annotate(
-            tickets_available=(
-                Sum("train__carriages__seats")
-                - Coalesce(Subquery(tickets_subquery), Value(0))
+        queryset = (
+            super()
+            .get_queryset()
+            .annotate(
+                tickets_available=(
+                    Sum("train__carriages__seats")
+                    - Coalesce(Subquery(tickets_subquery), Value(0))
+                )
             )
         )
 
@@ -249,10 +239,7 @@ class JourneyViewSet(viewsets.ModelViewSet):
         train_id_str = self.request.query_params.get("train")
 
         if departure_time is not None:
-            departure_date = datetime.strptime(
-                departure_time,
-                "%Y-%m-%d"
-            ).date()
+            departure_date = datetime.strptime(departure_time, "%Y-%m-%d").date()
             queryset = queryset.filter(departure_time__day=departure_date.day)
 
         if arrival_time is not None:
@@ -277,15 +264,12 @@ class JourneyViewSet(viewsets.ModelViewSet):
         methods=["POST"],
         detail=True,
         url_path="upload-image",
-        permission_classes=[IsAdminUser]
+        permission_classes=[IsAdminUser],
     )
     def upload_image(self, request, pk=None):
         """Endpoint to upload an image to a journey"""
         journey = self.get_object()
-        serializer = self.get_serializer(
-            journey,
-            data=request.data
-        )
+        serializer = self.get_serializer(journey, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -297,20 +281,18 @@ class JourneyViewSet(viewsets.ModelViewSet):
                 type=OpenApiTypes.DATE,
                 description=(
                     "Filter by departure time (ex. ?departure_time=2021-12-31)"
-                )
+                ),
             ),
             OpenApiParameter(
                 "arrival_time",
                 type=OpenApiTypes.DATE,
-                description=(
-                    "Filter by arrival time (ex. ?arrival_time=2021-12-31)"
-                )
+                description=("Filter by arrival time (ex. ?arrival_time=2021-12-31)"),
             ),
             OpenApiParameter(
                 "train",
                 type=OpenApiTypes.INT,
-                description="Filter by train id (ex. ?train=1)"
-            )
+                description="Filter by train id (ex. ?train=1)",
+            ),
         ]
     )
     def list(self, request, *args, **kwargs):

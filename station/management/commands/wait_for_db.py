@@ -27,15 +27,12 @@ class Command(BaseCommand):
                 if attempts >= max_attempts:
                     self.stdout.write(
                         self.style.ERROR(
-                            "Max attempts reached. "
-                            "Could not connect to database."
+                            "Max attempts reached. " "Could not connect to database."
                         )
                     )
                     raise e
                 self.stdout.write(
-                    self.style.WARNING(
-                        "Database unavailable, waiting 1 second..."
-                    )
+                    self.style.WARNING("Database unavailable, waiting 1 second...")
                 )
                 time.sleep(1)
 

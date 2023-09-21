@@ -20,22 +20,15 @@ class Train(models.Model):
     name = models.CharField(max_length=255)
     number = models.CharField(max_length=8, unique=True)
     train_type = models.ForeignKey(
-        TrainType,
-        on_delete=models.CASCADE,
-        related_name="trains"
+        TrainType, on_delete=models.CASCADE, related_name="trains"
     )
     image = models.ImageField(
-        blank=True,
-        null=True,
-        upload_to=UploadToPath("train-images/")
+        blank=True, null=True, upload_to=UploadToPath("train-images/")
     )
 
     @property
     def capacity(self):
-        return sum(
-            carriage.seats
-            for carriage in self.carriages.all()
-        )
+        return sum(carriage.seats for carriage in self.carriages.all())
 
     class Meta:
         ordering = ["number"]
@@ -64,17 +57,11 @@ class Carriage(models.Model):
 
     number = models.IntegerField(validators=[MinValueValidator(1)])
     seats = models.IntegerField()
-    train = models.ForeignKey(
-        Train,
-        on_delete=models.CASCADE,
-        related_name="carriages"
-    )
+    train = models.ForeignKey(Train, on_delete=models.CASCADE, related_name="carriages")
 
     @property
     def seat_price(self):
-        return self.CARRIAGE_TYPE_SEAT_PRICES[
-            Carriage.CarriageType(self.carriage_type)
-        ]
+        return self.CARRIAGE_TYPE_SEAT_PRICES[Carriage.CarriageType(self.carriage_type)]
 
     @staticmethod
     def validate_carriage_number(number, train, error_to_raise):
@@ -82,7 +69,7 @@ class Carriage(models.Model):
             raise error_to_raise(
                 {
                     "number": "Carriage with this number "
-                              "already exists for this train."
+                    "already exists for this train."
                 }
             )
 
@@ -93,8 +80,7 @@ class Carriage(models.Model):
         ordering = ["number"]
         constraints = [
             models.UniqueConstraint(
-                fields=["number", "train"],
-                name="unique_carriage_number"
+                fields=["number", "train"], name="unique_carriage_number"
             )
         ]
 
@@ -118,14 +104,10 @@ class Route(models.Model):
     name = models.CharField(max_length=255)
     distance = models.IntegerField()
     from_station = models.ForeignKey(
-        Station,
-        on_delete=models.CASCADE,
-        related_name="from_station"
+        Station, on_delete=models.CASCADE, related_name="from_station"
     )
     to_station = models.ForeignKey(
-        Station,
-        on_delete=models.CASCADE,
-        related_name="to_station"
+        Station, on_delete=models.CASCADE, related_name="to_station"
     )
 
     class Meta:
@@ -139,9 +121,7 @@ class Crew(models.Model):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     image = models.ImageField(
-        blank=True,
-        null=True,
-        upload_to=UploadToPath("crew-images/")
+        blank=True, null=True, upload_to=UploadToPath("crew-images/")
     )
 
     class Meta:
@@ -160,29 +140,16 @@ class Journey(models.Model):
     crew = models.ManyToManyField(Crew)
     departure_time = models.DateTimeField()
     arrival_time = models.DateTimeField()
-    route = models.ForeignKey(
-        Route,
-        on_delete=models.CASCADE,
-        related_name="journeys"
-    )
-    train = models.ForeignKey(
-        Train,
-        on_delete=models.CASCADE,
-        related_name="journeys"
-    )
+    route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name="journeys")
+    train = models.ForeignKey(Train, on_delete=models.CASCADE, related_name="journeys")
     image = models.ImageField(
-        blank=True,
-        null=True,
-        upload_to=UploadToPath("journey-images/")
+        blank=True, null=True, upload_to=UploadToPath("journey-images/")
     )
 
     def clean(self):
         if self.departure_time >= self.arrival_time:
             raise ValidationError(
-                {
-                    "arrival_time":
-                        "Arrival time must be greater than departure time"
-                }
+                {"arrival_time": "Arrival time must be greater than departure time"}
             )
 
     def save(self, *args, **kwargs):
@@ -202,9 +169,7 @@ class Journey(models.Model):
 class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="orders"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="orders"
     )
 
     class Meta:
@@ -217,20 +182,12 @@ class Order(models.Model):
 class Ticket(models.Model):
     seat = models.IntegerField()
     carriage = models.ForeignKey(
-        Carriage,
-        on_delete=models.CASCADE,
-        related_name="tickets"
+        Carriage, on_delete=models.CASCADE, related_name="tickets"
     )
     journey = models.ForeignKey(
-        Journey,
-        on_delete=models.CASCADE,
-        related_name="tickets"
+        Journey, on_delete=models.CASCADE, related_name="tickets"
     )
-    order = models.ForeignKey(
-        Order,
-        on_delete=models.CASCADE,
-        related_name="tickets"
-    )
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="tickets")
 
     @property
     def price(self):
@@ -239,42 +196,37 @@ class Ticket(models.Model):
     @staticmethod
     def validate_ticket(seat, carriage, journey, error_to_raise):
         if Ticket.objects.filter(
-                carriage=carriage,
-                seat=seat,
-                journey=journey
+            carriage=carriage, seat=seat, journey=journey
         ).exists():
             raise error_to_raise(
                 {
-                    "seat":
-                        f"A ticket for seat: {seat}, "
-                        f"in carriage: {carriage.number}, "
-                        f"on train: {journey.train}, "
-                        f"on journey route: {journey.route.name}, "
-                        f"already exists."
+                    "seat": f"A ticket for seat: {seat}, "
+                    f"in carriage: {carriage.number}, "
+                    f"on train: {journey.train}, "
+                    f"on journey route: {journey.route.name}, "
+                    f"already exists."
                 }
             )
 
         if not carriage.is_seat_number_valid(seat):
             raise error_to_raise(
                 {
-                    "seat":
-                        f"Seat number must be in available range: "
-                        f"(1, {carriage.seats}), "
-                        f"but got: {seat}"
+                    "seat": f"Seat number must be in available range: "
+                    f"(1, {carriage.seats}), "
+                    f"but got: {seat}"
                 }
             )
 
     def clean(self):
         self.validate_ticket(
-            self.seat, self.carriage, self.journey, ValidationError,
+            self.seat,
+            self.carriage,
+            self.journey,
+            ValidationError,
         )
 
     def save(
-            self,
-            force_insert=False,
-            force_update=False,
-            using=None,
-            update_fields=None
+        self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
         self.full_clean()
         return super(Ticket, self).save(
@@ -284,8 +236,7 @@ class Ticket(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["carriage", "seat", "journey"],
-                name="unique_ticket"
+                fields=["carriage", "seat", "journey"], name="unique_ticket"
             )
         ]
         ordering = ["carriage", "seat"]

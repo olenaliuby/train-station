@@ -5,15 +5,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('station', '0001_initial'),
+        ("station", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='carriage',
-            name='number',
-            field=models.IntegerField(validators=[django.core.validators.MinValueValidator(1)]),
+            model_name="carriage",
+            name="number",
+            field=models.IntegerField(
+                validators=[django.core.validators.MinValueValidator(1)]
+            ),
         ),
     ]

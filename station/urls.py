@@ -9,7 +9,7 @@ from station.views import (
     RouteViewSet,
     CrewViewSet,
     JourneyViewSet,
-    OrderViewSet
+    OrderViewSet,
 )
 
 router = routers.DefaultRouter()

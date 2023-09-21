@@ -9,7 +9,7 @@ from station.models import (
     Crew,
     Journey,
     Ticket,
-    Order
+    Order,
 )
 
 
